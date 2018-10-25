@@ -1,0 +1,16 @@
+int nn=10;
+mesh Th=square(nn,nn);
+macro grad(u) [dx(u),dy(u)] //
+macro Grad(u1,u2) [grad(u1),grad(u2)]  //
+macro D(u1,u2) [ [dx(u1),(dy(u1)+dx(u2))*.5] , [(dy(u1)+dx(u2))*.5,dy(u2)] ]   //
+macro div(u1,u2) (dx(u1)+dy(u2))//
+real epsp =1e-8, mu = 1;
+fespace Vh(Th,P2); fespace Ph(Th,P1); // Taylor Hood Finite element
+
+Vh u1,u2, v1,v2;   Ph p,q ; 
+solve Stokes([u1,u2,p],[v1,v2,q]) =
+int2d(Th) ( mu*(Grad(u1,u2):Grad(v1,v2)) 
+            - div(u1,u2)*q   - div(v1,v2)*p  -epsp*p*q ) 
+ + on(1,2,4,u1=0,u2=0) + on(3,u1=1,u2=0) ;
+ plot([u1,u2],p,wait=1);
+ cout << " mean value pressure= " << int2d(Th)(p)/Th.area<<endl; 
